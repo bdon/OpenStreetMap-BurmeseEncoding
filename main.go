@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"github.com/google/myanmar-tools/clients/go"
 	"github.com/paulmach/osm"
@@ -15,12 +16,14 @@ import (
 	"unicode/utf8"
 )
 
-// interface Result struct {
-//   Datestamp string
-//   Threshold float32
-//   LikelyZawgyiCount int64
-//   HasBurmeseCount int64
-// }
+type Results struct {
+	OsmReplicationTimestamp string
+	OsmReplicationSeqnum    uint64
+	Threshold               float64
+	LikelyZawgyiCount       int
+	HasBurmeseCount         int
+	ElapsedSeconds          float64
+}
 
 func hasBurmeseCodepoint(s string) bool {
 	for i := 0; i < len(s); {
@@ -34,17 +37,18 @@ func hasBurmeseCodepoint(s string) bool {
 }
 
 func main() {
+	threshold := 0.8
 	start := time.Now()
 
 	// open the OSM PBF data
-	file, err := os.Open("./myanmar.osm.pbf")
+	file, err := os.Open(os.Args[1])
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
 	// open the output writer
-	output, err := os.Create("output.csv.gz")
+	output, err := os.Create(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +72,7 @@ func main() {
 			if hasBurmeseCodepoint(v) {
 				score := zgDetector.GetZawgyiProbability(v)
 				hasBurmeseCount += 1
-				if score > 0.8 {
+				if score > threshold {
 					likelyZawgyiCount += 1
 					rows = append(rows, []string{fmt.Sprintf("%.2f", score), osmType, strconv.FormatInt(osmId, 10), key, v, Zg2uni(v)})
 				}
@@ -77,6 +81,7 @@ func main() {
 	}
 
 	scanner := osmpbf.New(context.Background(), file, runtime.GOMAXPROCS(-1))
+
 	defer scanner.Close()
 
 	for scanner.Scan() {
@@ -90,9 +95,8 @@ func main() {
 		}
 	}
 
-	elapsed := time.Since(start)
-	fmt.Println("took %s", elapsed)
-	fmt.Println(likelyZawgyiCount, hasBurmeseCount, float32(likelyZawgyiCount)/float32(hasBurmeseCount)*100)
+	// fmt.Println("took %s", elapsed)
+	// fmt.Println(likelyZawgyiCount, hasBurmeseCount, float32(likelyZawgyiCount)/float32(hasBurmeseCount)*100)
 
 	for _, row := range rows {
 		if err := csvw.Write(row); err != nil {
@@ -105,10 +109,19 @@ func main() {
 		panic(err)
 	}
 
-	// number of strings with burmese text: ABCD
-	// number of those strings
-
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
+
+	header, _ := scanner.Header()
+	results := Results{
+		Threshold:               threshold,
+		ElapsedSeconds:          time.Since(start).Seconds(),
+		OsmReplicationTimestamp: header.ReplicationTimestamp.Format(time.RFC3339),
+		OsmReplicationSeqnum:    header.ReplicationSeqNum,
+		LikelyZawgyiCount:       likelyZawgyiCount,
+		HasBurmeseCount:         hasBurmeseCount,
+	}
+	jsonData, _ := json.MarshalIndent(results, "", "  ")
+	fmt.Println(string(jsonData))
 }
