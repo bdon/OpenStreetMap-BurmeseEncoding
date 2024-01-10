@@ -1,0 +1,12 @@
+github.com/datadog/czlib v0.0.0-20160811164712-4bc9a24e37f2 h1:ISaMhBq2dagaoptFGUyywT5SzpysCbHofX3sCNw1djo=
+github.com/datadog/czlib v0.0.0-20160811164712-4bc9a24e37f2/go.mod h1:2yDaWzisHKoQoxm+EU4YgKBaD7g1M0pxy7THWG44Lro=
+github.com/google/myanmar-tools/clients/go v0.0.0-20231128040956-1a0170217247 h1:anIcfbUgBi4BXLXwrjVkzze0nrOmb8IKQ8vFbQWKgcc=
+github.com/google/myanmar-tools/clients/go v0.0.0-20231128040956-1a0170217247/go.mod h1:R7cAoMJMUJMPzyA5BAwq45Er63LNms4JuV+BXxqjR0w=
+github.com/paulmach/orb v0.1.3 h1:Wa1nzU269Zv7V9paVEY1COWW8FCqv4PC/KJRbJSimpM=
+github.com/paulmach/orb v0.1.3/go.mod h1:VFlX/8C+IQ1p6FTRRKzKoOPJnvEtA5G0Veuqwbu//Vk=
+github.com/paulmach/osm v0.8.0 h1:vHxgnljlCUTr8TnPYdL1nmJNeDs9DsFi3s/F5URJ4vg=
+github.com/paulmach/osm v0.8.0/go.mod h1:p3mtw8ytr+f/YmaZQrJCSz/eQMJmQkDTx+sUaRFE+8U=
+github.com/paulmach/protoscan v0.2.1 h1:rM0FpcTjUMvPUNk2BhPJrreDKetq43ChnL+x1sRg8O8=
+github.com/paulmach/protoscan v0.2.1/go.mod h1:SpcSwydNLrxUGSDvXvO0P7g7AuhJ7lcKfDlhJCDw2gY=
+google.golang.org/protobuf v1.27.1 h1:SnqbnDw1V7RiZcXPx5MEeqPv2s79L9i7BJUlG/+RurQ=
+google.golang.org/protobuf v1.27.1/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
