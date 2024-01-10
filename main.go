@@ -1,7 +1,6 @@
 package main
 
 import (
-	"compress/gzip"
 	"context"
 	"encoding/csv"
 	"encoding/json"
@@ -11,6 +10,7 @@ import (
 	"github.com/paulmach/osm/osmpbf"
 	"os"
 	"runtime"
+	"sort"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -23,6 +23,25 @@ type Results struct {
 	LikelyZawgyiCount       int
 	HasBurmeseCount         int
 	ElapsedSeconds          float64
+}
+
+type Row struct {
+	Score     float64
+	OsmType   int
+	OsmId     int64
+	Key       string
+	Value     string
+	Suggested string
+}
+
+func osmTypeString(i int) string {
+	if i == 0 {
+		return "node"
+	} else if i == 1 {
+		return "way"
+	} else {
+		return "relation"
+	}
 }
 
 func hasBurmeseCodepoint(s string) bool {
@@ -54,27 +73,32 @@ func main() {
 	}
 	defer output.Close()
 
-	gw := gzip.NewWriter(output)
-	defer gw.Close()
-	csvw := csv.NewWriter(gw)
+	csvw := csv.NewWriter(output)
 
 	zgDetector := myanmartools.NewZawgyiDetector()
 
 	hasBurmeseCount := 0
 	likelyZawgyiCount := 0
 
-	rows := make([][]string, 0)
+	rows := make([]Row, 0)
 
 	// osm_type osm_id key text suggested_text
 
-	processTags := func(osmType string, osmId int64, tags map[string]string) {
+	processTags := func(osmType int, osmId int64, tags map[string]string) {
 		for key, v := range tags {
 			if hasBurmeseCodepoint(v) {
 				score := zgDetector.GetZawgyiProbability(v)
 				hasBurmeseCount += 1
 				if score > threshold {
 					likelyZawgyiCount += 1
-					rows = append(rows, []string{fmt.Sprintf("%.2f", score), osmType, strconv.FormatInt(osmId, 10), key, v, Zg2uni(v)})
+					rows = append(rows, Row{
+						Score:     score,
+						OsmType:   osmType,
+						OsmId:     osmId,
+						Key:       key,
+						Value:     v,
+						Suggested: Zg2uni(v),
+					})
 				}
 			}
 		}
@@ -87,19 +111,31 @@ func main() {
 	for scanner.Scan() {
 		switch o := scanner.Object().(type) {
 		case *osm.Node:
-			processTags("node", o.ObjectID().Ref(), o.Tags.Map())
+			processTags(0, o.ObjectID().Ref(), o.Tags.Map())
 		case *osm.Way:
-			processTags("way", o.ObjectID().Ref(), o.Tags.Map())
+			processTags(1, o.ObjectID().Ref(), o.Tags.Map())
 		case *osm.Relation:
-			processTags("relation", o.ObjectID().Ref(), o.Tags.Map())
+			processTags(2, o.ObjectID().Ref(), o.Tags.Map())
 		}
 	}
 
-	// fmt.Println("took %s", elapsed)
-	// fmt.Println(likelyZawgyiCount, hasBurmeseCount, float32(likelyZawgyiCount)/float32(hasBurmeseCount)*100)
+	// sort by score > osm type > osm id > key
+	sort.Slice(rows, func(i int, j int) bool {
+		if rows[i].Score != rows[j].Score {
+			return rows[i].Score > rows[j].Score
+		}
+		if rows[i].OsmType != rows[j].OsmType {
+			return rows[i].OsmType < rows[j].OsmType
+		}
+		if rows[i].OsmId != rows[j].OsmId {
+			return rows[i].OsmId < rows[j].OsmId
+		}
+		return rows[i].Key < rows[j].Key
+	})
 
 	for _, row := range rows {
-		if err := csvw.Write(row); err != nil {
+		row_str := []string{fmt.Sprintf("%.2f", row.Score), osmTypeString(row.OsmType), strconv.FormatInt(row.OsmId, 10), row.Key, row.Value, row.Suggested}
+		if err := csvw.Write(row_str); err != nil {
 			panic(err)
 		}
 	}

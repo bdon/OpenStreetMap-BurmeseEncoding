@@ -38,10 +38,8 @@
 <body>
     <div id="app">
         <h1>OpenStreetMap Burmese Encoding</h1>
-
         <p>See <a href="https://github.com/bdon/OpenStreetMap-BurmeseEncoding">the github repository</a> for how to contribute.</p>
-        <p>Results are ordered in descending score.</p> 
-
+        <p>Results are ordered by descending score.</p>
         <table border="1">
             <tr>
                 <th>
@@ -84,7 +82,7 @@
             },
             methods: {
                 loadCsv() {
-                    const csvUrl = 'http://openstreetmap-qa.protomaps.dev/zawgyi/latest.csv';
+                    const csvUrl = 'https://openstreetmap-qa.protomaps.dev/zawgyi/latest.csv';
 
                     Papa.parse(csvUrl, {
                         download: true,
