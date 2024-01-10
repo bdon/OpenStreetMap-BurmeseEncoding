@@ -20,4 +20,9 @@ Do not automate edits to OpenStreetMap data.
 
 1. Create an account on [openstreetmap.org](http://openstreetmap.org)
 2. Click the link to an OSM Object on the [Viewer](https://bdon.github.io/OpenStreetMap-BurmeseEncoding)
+3. Edit text using the web editor
+4. Add `#zawgyi` to your changeset description.
    
+## License
+
+BSD-2-Clause, except for [Rabbit](https://github.com/Rabbit-Converter/Rabbit-Go) which is pending license.
