@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenStreetMap-BurmeseEncoding</title>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/papaparse@5"></script>
+    <style>
+        #app {
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        body {
+            font-family: monospace;
+        }
+
+        .limited-width {
+            max-width: 400px;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        a {
+            color: #777;
+        }
+
+        a:visited {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>OpenStreetMap Burmese Encoding</h1>
+
+        <p>See <a href="https://github.com/bdon/OpenStreetMap-BurmeseEncoding">the github repository</a> for how to contribute.</p>
+        <p>Results are ordered in descending score.</p> 
+
+        <table border="1">
+            <tr>
+                <th>
+                   score 
+                </th>
+                <th>
+                  link 
+                </th>
+                <th>
+                   key
+                </th>
+                <th>
+                   value
+                </th>
+                <th>
+                   suggested_value
+                </th>
+            </tr>
+            <tr v-for="row in rows">
+                <td>{{ row.score }}</td>
+                <td><a v-bind:href="`https://openstreetmap.org/${row.link}`" target="_blank">{{ row.link }}</a></td>
+                <td>{{ row.key }}</td>
+                <td class="limited-width">{{ row.value }}</td>
+                <td class="limited-width">{{ row.suggested_value }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    rows: []
+                };
+            },
+            mounted() {
+                this.loadCsv();
+            },
+            methods: {
+                loadCsv() {
+                    const csvUrl = 'http://openstreetmap-qa.protomaps.dev/zawgyi/latest.csv';
+
+                    Papa.parse(csvUrl, {
+                        download: true,
+                        header: false,
+                        complete: (result) => {
+                            this.rows = result.data.map(row => {
+                                const link = row[1] + '/' + row[2];
+                                return {
+                                    score:row[0],
+                                    link: row[1] + '/' + row[2],
+                                    key: row[3],
+                                    value: row[4],
+                                    suggested_value: row[5]
+                                  }
+                            })
+                        }
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
