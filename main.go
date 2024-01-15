@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/csv"
 	"encoding/json"
@@ -73,7 +74,9 @@ func main() {
 	}
 	defer output.Close()
 
-	csvw := csv.NewWriter(output)
+	gw := gzip.NewWriter(output)
+	defer gw.Close()
+	csvw := csv.NewWriter(gw)
 
 	zgDetector := myanmartools.NewZawgyiDetector()
 
