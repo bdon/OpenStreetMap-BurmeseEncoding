@@ -93,15 +93,17 @@ func main() {
 				score := zgDetector.GetZawgyiProbability(v)
 				hasBurmeseCount += 1
 				if score > threshold {
-					likelyZawgyiCount += 1
-					rows = append(rows, Row{
-						Score:     score,
-						OsmType:   osmType,
-						OsmId:     osmId,
-						Key:       key,
-						Value:     v,
-						Suggested: Zg2uni(v),
-					})
+					if uni := Zg2uni(v); uni != v {
+						likelyZawgyiCount += 1
+						rows = append(rows, Row{
+							Score:     score,
+							OsmType:   osmType,
+							OsmId:     osmId,
+							Key:       key,
+							Value:     v,
+							Suggested: uni,
+						})
+					}
 				}
 			}
 		}
