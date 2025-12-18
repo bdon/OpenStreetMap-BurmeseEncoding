@@ -1,3 +1,7 @@
+# Osmose
+
+See https://github.com/osmose-qa/osmose-backend/issues/2442 for details about integrating the Zawgyi check into Osmose.
+
 # OpenStreetMap Burmese Encoding
 
 A QA tool for the [OpenStreetMap](http://openstreetmap.org) database to detect the non-Unicode [Zawgyi text encoding](https://en.wikipedia.org/wiki/Zawgyi_font) for Burmese (Myanmar) language.
@@ -26,3 +30,4 @@ Do not automate edits to OpenStreetMap data.
 ## License
 
 BSD-2-Clause, except for [Rabbit](https://github.com/Rabbit-Converter/Rabbit-Go) which is pending license.
+
